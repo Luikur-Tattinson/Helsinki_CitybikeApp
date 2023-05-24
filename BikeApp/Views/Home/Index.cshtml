@@ -1,0 +1,21 @@
+﻿@model BikeApp.Models.KeyModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="map" style="height: 400px; width: 100%;"></div>
+
+<script>
+    function initMap() {
+        var options = {
+            zoom: 12,
+            center: { lat: 60.19193, lng: 24.91967 }
+        };
+
+        var map = new google.maps.Map(document.getElementById('map'), options);
+
+        }
+</script>
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=@Model?.Key&callback=initMap"></script>
