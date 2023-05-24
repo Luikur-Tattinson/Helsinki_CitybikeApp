@@ -15,6 +15,23 @@
 
         var map = new google.maps.Map(document.getElementById('map'), options);
 
+    @if (Model.Stations != null && Model.Stations.Count > 0)
+    {
+        @foreach (var station in Model.Stations)
+        {
+            <text>
+                var lng = parseFloat('@station.X'.replace(',', '.'));
+                var lat = parseFloat('@station.Y'.replace(',', '.'));
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    new google.maps.Marker({
+                        position: { lat: lat, lng: lng },
+                        map: map
+                    });
+                }
+            </text>
+        }
+    }
         }
 </script>
 
