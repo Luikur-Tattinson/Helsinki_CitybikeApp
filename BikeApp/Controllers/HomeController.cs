@@ -43,7 +43,7 @@ namespace BikeApp.Controllers
 
                 string query = "SELECT key_value FROM dbo.api_key";
                 var result = await connection.QueryFirstOrDefaultAsync<ApiKey>(query);
-                string queryStations = "SELECT x, y FROM dbo.Stations";
+                string queryStations = "SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet FROM dbo.Stations";
                 var stations = (await connection.QueryAsync<Station>(queryStations)).ToList();
 
                 _logger.LogInformation("Retrieved data from the database.");

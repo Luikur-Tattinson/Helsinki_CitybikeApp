@@ -5,7 +5,6 @@
 }
 
 <div id="map" style="height: 400px; width: 100%;"></div>
-
 <script>
     function initMap() {
         var options = {
@@ -14,6 +13,9 @@
         };
 
         var map = new google.maps.Map(document.getElementById('map'), options);
+        var infoWindow = new google.maps.InfoWindow();
+
+        var openInfoWindow = null;
 
     @if (Model.Stations != null && Model.Stations.Count > 0)
     {
@@ -24,15 +26,42 @@
                 var lat = parseFloat('@station.Y'.replace(',', '.'));
 
                 if (!isNaN(lat) && !isNaN(lng)) {
-                    new google.maps.Marker({
+                    var marker = new google.maps.Marker({
                         position: { lat: lat, lng: lng },
                         map: map
                     });
+
+                    var content = '<div><h3>' + '@station.Nimi' + '</h3>' +
+                        '<p><strong>' + '@station.Namn' + '</strong></p>' +
+                        '<p>' + 'Osoite: ' + '@station.Osoite' + '</p>' +
+                        '<p>' + 'Kaupunki: ' + '@station.Kaupunki' + '</p>' +
+                        '<p>' + 'Operaattori: ' + '@station.Operaattor' + '</p>' +
+                        '<p>' + 'Kapasiteetti: ' + '@station.Kapasiteet' + '</p></div>';
+
+                    addMarkerListener(marker, content);
                 }
             </text>
         }
     }
-        }
-</script>
 
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=@Model?.Key&callback=initMap"></script>
+            function addMarkerListener(marker, content) {
+                marker.addListener('click', function () {
+                    if (openInfoWindow) {
+                        openInfoWindow.close();
+                    }
+
+                    infoWindow.setContent(content);
+                    infoWindow.open(map, marker);
+                    openInfoWindow = infoWindow;
+                });
+            }
+    }
+
+    function loadGoogleMaps() {
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=@Model?.Key&callback=initMap';
+        document.head.appendChild(script);
+    }
+
+    window.addEventListener('load', loadGoogleMaps);
+</script>
