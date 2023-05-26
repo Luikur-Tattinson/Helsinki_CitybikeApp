@@ -9,6 +9,8 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Http;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,7 @@ builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredent
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DatabaseController>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSession(); // Add session services
 
 var app = builder.Build();
 
@@ -42,6 +45,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseSession(); // Add session middleware
 
 // Call a method to configure Dapper mappings
 ConfigureDapperMappings();
@@ -98,6 +103,5 @@ PropertyInfo GetPropertyByColumnName(Type type, string columnName)
 
     return null;
 }
-
 
 app.Run();

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static DatabaseController;
+using Microsoft.AspNetCore.Http;
 
 namespace BikeApp.Controllers
 {
@@ -35,6 +36,7 @@ namespace BikeApp.Controllers
 
         public async Task<IActionResult> Index()
         {
+
             _logger.LogInformation("Connecting to the database...");
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -66,12 +68,19 @@ namespace BikeApp.Controllers
             }
         }
 
-        public IActionResult Journeys(int? month, int page = 1, int pageSize = 10)
+        public IActionResult Journeys(int? month, string orderBy, string sortOrder, int page = 1, int pageSize = 10)
         {
-            if (!month.HasValue)
+            // Retrieve the selected month from the session
+            int? selectedMonth = HttpContext.Session.GetInt32("SelectedMonth");
+
+            // Use the selected month if available, otherwise use the default month
+            if (!month.HasValue || month < 5 || month > 7)
             {
-                month = 5;
+                month = selectedMonth ?? 5; // Default month
             }
+
+            // Store the selected month in the session
+            HttpContext.Session.SetInt32("SelectedMonth", month.Value);
 
             string tableName = $"dbo.[2021-{month:00}]";
 
@@ -84,19 +93,19 @@ namespace BikeApp.Controllers
 
                 int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
 
-                string query = $@"SELECT *,
-    CAST([Departure] AS DATETIME) AS [Departure],
-    CAST([Return] AS DATETIME) AS [Return]
-FROM (
-    SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum, 
-        [Departure], [Return], [Departure station id], [Departure station name],
-        [Return station id], [Return station name], [Covered distance_m], [Duration_sec]
-    FROM {tableName}
-) AS J
-WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
+                string orderByClause = GetOrderByClause(orderBy, sortOrder);
 
-
-
+                string query = $@"
+        SELECT *,
+            CAST([Departure] AS DATETIME) AS [Departure],
+            CAST([Return] AS DATETIME) AS [Return]
+        FROM (
+            SELECT ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum, 
+                [Departure], [Return], [Departure station id], [Departure station name],
+                [Return station id], [Return station name], [Covered distance_m], [Duration_sec]
+            FROM {tableName}
+        ) AS J
+        WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
 
                 int startIndex = (page - 1) * pageSize + 1;
                 int endIndex = page * pageSize;
@@ -111,12 +120,55 @@ WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
                         CurrentPage = page,
                         PageSize = pageSize,
                         TotalPages = totalPages
-                    }
+                    },
+                    OrderBy = orderBy,
+                    SortOrder = sortOrder,
+                    SelectedMonth = month.Value // Add the selected month to the view model
                 };
 
                 return View(model);
             }
         }
+
+
+        private string GetOrderByClause(string orderBy, string sortOrder)
+        {
+            string orderByClause = string.Empty;
+
+            switch (orderBy)
+            {
+                case "Departure":
+                    orderByClause = $"[Departure] {sortOrder}";
+                    break;
+                case "Return":
+                    orderByClause = $"[Return] {sortOrder}";
+                    break;
+                case "DepartureStationId":
+                    orderByClause = $"[Departure station id] {sortOrder}";
+                    break;
+                case "DepartureStationName":
+                    orderByClause = $"[Departure station name] {sortOrder}";
+                    break;
+                case "ReturnStationId":
+                    orderByClause = $"[Return station id] {sortOrder}";
+                    break;
+                case "ReturnStationName":
+                    orderByClause = $"[Return station name] {sortOrder}";
+                    break;
+                case "CoveredDistance":
+                    orderByClause = $"[Covered distance_m] {sortOrder}";
+                    break;
+                case "Duration":
+                    orderByClause = $"[Duration_sec] {sortOrder}";
+                    break;
+                default:
+                    orderByClause = "[Departure] DESC"; // Default sorting by Departure column
+                    break;
+            }
+
+            return orderByClause;
+        }
+
 
 
     }

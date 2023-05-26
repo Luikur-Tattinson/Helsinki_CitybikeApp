@@ -6,19 +6,40 @@
 
 <h1>Journeys</h1>
 
+@{
+    string selectedMonth = ViewBag.Month?.ToString();
+    string orderBy = ViewContext.HttpContext.Request.Query["orderBy"].FirstOrDefault();
+    string sortOrder = ViewContext.HttpContext.Request.Query["sortOrder"].FirstOrDefault();
+}
+
+<div>
+    <form asp-controller="Home" asp-action="Journeys" method="get">
+        <label for="month">Select Month:</label>
+        <select id="month" name="month">
+            <option value="5" selected="@(Model.SelectedMonth == 5 ? "selected" : null)">May</option>
+            <option value="6" selected="@(Model.SelectedMonth == 6 ? "selected" : null)">June</option>
+            <option value="7" selected="@(Model.SelectedMonth == 7 ? "selected" : null)">July</option>
+        </select>
+        <input type="hidden" name="orderBy" value="@Model.OrderBy" />
+        <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
+        <button type="submit">Apply Filter</button>
+    </form>
+</div>
+
 <table>
     <thead>
         <tr>
-            <th>Departure</th>
-            <th>Return</th>
-            <th>Departure Station ID</th>
-            <th>Departure Station Name</th>
-            <th>Return Station ID</th>
-            <th>Return Station Name</th>
-            <th>Covered Distance (m)</th>
-            <th>Duration (sec)</th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=Departure">Departure</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=Return">Return</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=DepartureStationId">Departure Station ID</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=DepartureStationName">Departure Station Name</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=ReturnStationId">Return Station ID</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=ReturnStationName">Return Station Name</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=CoveredDistance_m">Covered Distance (m)</a></th>
+            <th><a href="/Home/Journeys?month=@selectedMonth&amp;orderBy=Duration_sec">Duration (sec)</a></th>
         </tr>
     </thead>
+
     <tbody>
         @foreach (var journey in Model.Journeys)
         {
@@ -35,18 +56,6 @@
         }
     </tbody>
 </table>
-<div>
-    <form action="/Home/Journeys" method="get">
-        <label for="month">Select Month:</label>
-        <select id="month" name="month">
-            <option value="5" selected="@(ViewBag.Month == 5 ? "selected" : null)">May</option>
-            <option value="6" selected="@(ViewBag.Month == 6 ? "selected" : null)">June</option>
-            <option value="7" selected="@(ViewBag.Month == 7 ? "selected" : null)">July</option>
-        </select>
-        <button type="submit">Apply Filter</button>
-    </form>
-</div>
-
 
 
 <div>
@@ -57,30 +66,65 @@
                 @if (Model.Pagination.CurrentPage > 1)
                 {
                     <li class="page-item">
-                        <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@(Model.Pagination.CurrentPage - 1)">Previous</a>
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=1">First</a>
                     </li>
-                    @if (Model.Pagination.CurrentPage > 2)
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=@(Model.Pagination.CurrentPage - 1)">Previous</a>
+                    </li>
+                }
+                @if (Model.Pagination.CurrentPage > 3)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=1">1</a>
+                    </li>
+                    @if (Model.Pagination.CurrentPage > 4)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=1">First</a>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
                         </li>
                     }
                 }
-                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                @for (int i = Model.Pagination.CurrentPage - 2; i <= Model.Pagination.CurrentPage + 2 && i <= Model.Pagination.TotalPages; i++)
                 {
-                    @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages - 1)
+                    if (i > 0)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@Model.Pagination.TotalPages">Last</a>
+                        if (Model.Pagination.CurrentPage == i)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=@i">@i</a>
+                            </li>
+                        }
+                    }
+                }
+                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages - 2)
+                {
+                    @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages - 3)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
                         </li>
                     }
                     <li class="page-item">
-                        <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@(Model.Pagination.CurrentPage + 1)">Next</a>
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=@Model.Pagination.TotalPages">@Model.Pagination.TotalPages</a>
+                    </li>
+                }
+                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=@(Model.Pagination.CurrentPage + 1)">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@selectedMonth&amp;orderBy=@orderBy&amp;sortOrder=@sortOrder&amp;page=@Model.Pagination.TotalPages">Last</a>
                     </li>
                 }
             </ul>
         </nav>
     }
 </div>
-
 
