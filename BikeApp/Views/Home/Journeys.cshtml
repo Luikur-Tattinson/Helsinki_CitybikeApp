@@ -1,0 +1,86 @@
+﻿@model BikeApp.Models.JourneysViewModel
+
+@{
+    ViewData["Title"] = "Journeys";
+}
+
+<h1>Journeys</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Departure</th>
+            <th>Return</th>
+            <th>Departure Station ID</th>
+            <th>Departure Station Name</th>
+            <th>Return Station ID</th>
+            <th>Return Station Name</th>
+            <th>Covered Distance (m)</th>
+            <th>Duration (sec)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var journey in Model.Journeys)
+        {
+            <tr>
+                <td>@journey.Departure</td>
+                <td>@journey.Return</td>
+                <td>@journey.DepartureStationId</td>
+                <td>@journey.DepartureStationName</td>
+                <td>@journey.ReturnStationId</td>
+                <td>@journey.ReturnStationName</td>
+                <td>@journey.CoveredDistance_m</td>
+                <td>@journey.Duration_sec</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div>
+    <form action="/Home/Journeys" method="get">
+        <label for="month">Select Month:</label>
+        <select id="month" name="month">
+            <option value="5" selected="@(ViewBag.Month == 5 ? "selected" : null)">May</option>
+            <option value="6" selected="@(ViewBag.Month == 6 ? "selected" : null)">June</option>
+            <option value="7" selected="@(ViewBag.Month == 7 ? "selected" : null)">July</option>
+        </select>
+        <button type="submit">Apply Filter</button>
+    </form>
+</div>
+
+
+
+<div>
+    @if (Model.Pagination.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @if (Model.Pagination.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@(Model.Pagination.CurrentPage - 1)">Previous</a>
+                    </li>
+                    @if (Model.Pagination.CurrentPage > 2)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=1">First</a>
+                        </li>
+                    }
+                }
+                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                {
+                    @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages - 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@Model.Pagination.TotalPages">Last</a>
+                        </li>
+                    }
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Journeys?month=@ViewBag.Month&amp;page=@(Model.Pagination.CurrentPage + 1)">Next</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+

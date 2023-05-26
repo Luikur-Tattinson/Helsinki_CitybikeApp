@@ -6,10 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using static DatabaseController;
-using System.Linq;
 
 namespace BikeApp.Controllers
 {
@@ -49,8 +51,10 @@ namespace BikeApp.Controllers
                 _logger.LogInformation("Retrieved data from the database.");
                 _logger.LogInformation($"Key: {result?.key_value}");
 
-                var model = new KeyModel { Key = result?.key_value,
-                Stations = stations
+                var model = new KeyModel
+                {
+                    Key = result?.key_value,
+                    Stations = stations
                 };
                 _logger.LogInformation($"Model Key: {model?.Key}");
                 if (model.Stations != null && model.Stations.Count > 0)
@@ -61,5 +65,59 @@ namespace BikeApp.Controllers
                 return View("~/Views/Home/Index.cshtml", model);
             }
         }
+
+        public IActionResult Journeys(int? month, int page = 1, int pageSize = 10)
+        {
+            if (!month.HasValue)
+            {
+                month = 5;
+            }
+
+            string tableName = $"dbo.[2021-{month:00}]";
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+
+                string countQuery = $"SELECT COUNT(*) FROM {tableName}";
+                int totalRecords = connection.ExecuteScalar<int>(countQuery);
+
+                int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+                string query = $@"SELECT *,
+    CAST([Departure] AS DATETIME) AS [Departure],
+    CAST([Return] AS DATETIME) AS [Return]
+FROM (
+    SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS RowNum, 
+        [Departure], [Return], [Departure station id], [Departure station name],
+        [Return station id], [Return station name], [Covered distance_m], [Duration_sec]
+    FROM {tableName}
+) AS J
+WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
+
+
+
+
+                int startIndex = (page - 1) * pageSize + 1;
+                int endIndex = page * pageSize;
+
+                var journeys = connection.Query<JourneyModel>(query, new { StartIndex = startIndex, EndIndex = endIndex }).ToList();
+
+                var model = new JourneysViewModel
+                {
+                    Journeys = journeys,
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalPages = totalPages
+                    }
+                };
+
+                return View(model);
+            }
+        }
+
+
     }
 }
