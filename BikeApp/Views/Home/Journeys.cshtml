@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Journeys";
+    var searchTerm = Model.SearchTerm;
 }
 
 <h1>Journeys</h1>
@@ -20,6 +21,10 @@
             <option value="6" selected="@(Model.SelectedMonth == 6 ? "selected" : null)">June</option>
             <option value="7" selected="@(Model.SelectedMonth == 7 ? "selected" : null)">July</option>
         </select>
+
+        <label for="searchTerm">Search:</label>
+        <input type="text" id="searchTerm" name="searchTerm" value="@searchTerm" />
+
         <input type="hidden" name="orderBy" value="@Model.OrderBy" />
         <input type="hidden" name="sortOrder" value="@Model.SortOrder" />
         <button type="submit">Apply Filter</button>

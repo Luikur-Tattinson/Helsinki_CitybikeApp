@@ -68,7 +68,7 @@ namespace BikeApp.Controllers
             }
         }
 
-        public IActionResult Journeys(int? month, string orderBy, string sortOrder, int page = 1, int pageSize = 10)
+        public IActionResult Journeys(int? month, string orderBy, string sortOrder, string searchTerm, int page = 1, int pageSize = 10)
         {
             // Retrieve the selected month from the session
             int? selectedMonth = HttpContext.Session.GetInt32("SelectedMonth");
@@ -95,22 +95,25 @@ namespace BikeApp.Controllers
 
                 string orderByClause = GetOrderByClause(orderBy, sortOrder);
 
+                string searchCondition = string.IsNullOrEmpty(searchTerm) ? string.Empty : $"WHERE [Departure station name] LIKE '%' + @SearchTerm + '%'";
+
                 string query = $@"
-        SELECT *,
-            CAST([Departure] AS DATETIME) AS [Departure],
-            CAST([Return] AS DATETIME) AS [Return]
-        FROM (
-            SELECT ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum, 
-                [Departure], [Return], [Departure station id], [Departure station name],
-                [Return station id], [Return station name], [Covered distance_m], [Duration_sec]
-            FROM {tableName}
-        ) AS J
-        WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
+            SELECT *,
+                CAST([Departure] AS DATETIME) AS [Departure],
+                CAST([Return] AS DATETIME) AS [Return]
+            FROM (
+                SELECT ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum, 
+                    [Departure], [Return], [Departure station id], [Departure station name],
+                    [Return station id], [Return station name], [Covered distance_m], [Duration_sec]
+                FROM {tableName}
+                {searchCondition}
+            ) AS J
+            WHERE J.RowNum BETWEEN @StartIndex AND @EndIndex";
 
                 int startIndex = (page - 1) * pageSize + 1;
                 int endIndex = page * pageSize;
 
-                var journeys = connection.Query<JourneyModel>(query, new { StartIndex = startIndex, EndIndex = endIndex }).ToList();
+                var journeys = connection.Query<JourneyModel>(query, new { StartIndex = startIndex, EndIndex = endIndex, SearchTerm = searchTerm }).ToList();
 
                 var model = new JourneysViewModel
                 {
@@ -123,12 +126,14 @@ namespace BikeApp.Controllers
                     },
                     OrderBy = orderBy,
                     SortOrder = sortOrder,
-                    SelectedMonth = month.Value // Add the selected month to the view model
+                    SelectedMonth = month.Value, // Add the selected month to the view model
+                    SearchTerm = searchTerm // Add the search term to the view model
                 };
 
                 return View(model);
             }
         }
+
 
 
         private string GetOrderByClause(string orderBy, string sortOrder)

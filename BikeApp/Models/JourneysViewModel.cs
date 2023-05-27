@@ -7,6 +7,7 @@
         public string OrderBy { get; set; }
         public string SortOrder { get; set; }
         public int SelectedMonth { get; set; }
+        public string SearchTerm { get; set; }
 
         public string SortOrderFor(string column)
         {
