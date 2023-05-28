@@ -34,9 +34,8 @@ namespace BikeApp.Controllers
             _connectionString = secret.Value.Value;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
-
             _logger.LogInformation("Connecting to the database...");
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -53,20 +52,40 @@ namespace BikeApp.Controllers
                 _logger.LogInformation("Retrieved data from the database.");
                 _logger.LogInformation($"Key: {result?.key_value}");
 
+                var totalRecords = stations.Count;
+                var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
+
+                // Apply pagination
+                var startIndex = (page - 1) * pageSize;
+                var endIndex = startIndex + pageSize - 1;
+                var pagedStations = stations.Skip(startIndex).Take(pageSize).ToList();
+
                 var model = new KeyModel
                 {
                     Key = result?.key_value,
-                    Stations = stations
+                    Stations = pagedStations,
+                    AllStations = stations, // Store the complete list of stations
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = page,
+                        PageSize = pageSize,
+                        TotalPages = totalPages
+                    }
                 };
+
                 _logger.LogInformation($"Model Key: {model?.Key}");
                 if (model.Stations != null && model.Stations.Count > 0)
                 {
                     var firstStation = model.Stations[0];
                     _logger.LogInformation($"First station: X= {firstStation.X}, Y = {firstStation.Y}");
                 }
-                return View("~/Views/Home/Index.cshtml", model);
+
+                return View(model);
             }
         }
+
+
+
 
         public IActionResult Journeys(int? month, string orderBy, string sortOrder, string searchTerm, int page = 1, int pageSize = 10)
         {

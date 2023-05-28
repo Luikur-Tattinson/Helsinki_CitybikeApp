@@ -5,6 +5,87 @@
 }
 
 <div id="map" style="height: 400px; width: 100%;"></div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nimi</th>
+            <th>Kaupunki</th>
+            <!-- Add more columns as needed -->
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var station in Model.Stations)
+        {
+            <tr>
+                <td>@station.Nimi</td>
+                <td>@station.Kaupunki</td>
+                <!-- Add more columns as needed -->
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div>
+    @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @{
+                    int totalPages = Model.Pagination.TotalPages;
+                    int currentPage = Model.Pagination.CurrentPage;
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=1">First</a>
+                        </li>
+                    }
+
+                    if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@(currentPage - 1)">Previous</a>
+                        </li>
+                    }
+
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Index?page=@i">@i</a>
+                            </li>
+                        }
+                    }
+
+                    if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@(currentPage + 1)">Next</a>
+                        </li>
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@totalPages">Last</a>
+                        </li>
+                    }
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
 <script>
     function initMap() {
         var options = {
@@ -17,12 +98,12 @@
 
         var openInfoWindow = null;
 
-    @if (Model.Stations != null && Model.Stations.Count > 0)
+    @if (Model.AllStations != null && Model.AllStations.Count > 0)
     {
-        @foreach (var station in Model.Stations)
+        @foreach (var station in Model.AllStations)
         {
             <text>
-                var lng = parseFloat('@station.X'.replace(',', '.'));
+                                var lng = parseFloat('@station.X'.replace(',', '.'));
                 var lat = parseFloat('@station.Y'.replace(',', '.'));
 
                 if (!isNaN(lat) && !isNaN(lng)) {
@@ -65,3 +146,4 @@
 
     window.addEventListener('load', loadGoogleMaps);
 </script>
+
