@@ -34,7 +34,7 @@ namespace BikeApp.Controllers
             _connectionString = secret.Value.Value;
         }
 
-        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string orderBy = "Nimi", string sortOrder = "asc")
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string orderBy = "Nimi", string sortOrder = "asc", string search = "")
         {
             _logger.LogInformation("Connecting to the database...");
 
@@ -46,7 +46,8 @@ namespace BikeApp.Controllers
 
                 string query = "SELECT key_value FROM dbo.api_key";
                 var result = await connection.QueryFirstOrDefaultAsync<ApiKey>(query);
-                string queryStations = $"SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet FROM dbo.Stations ORDER BY {orderBy} {sortOrder}";
+
+                string queryStations = $"SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet FROM dbo.Stations WHERE Nimi LIKE '%{search}%' ORDER BY {orderBy} {sortOrder}";
                 var stations = (await connection.QueryAsync<Station>(queryStations)).ToList();
 
                 _logger.LogInformation("Retrieved data from the database.");
@@ -75,6 +76,7 @@ namespace BikeApp.Controllers
 
                 ViewData["OrderBy"] = orderBy;
                 ViewData["SortOrder"] = sortOrder;
+                ViewData["Search"] = search;
 
                 _logger.LogInformation($"Model Key: {model?.Key}");
                 if (model.Stations != null && model.Stations.Count > 0)
@@ -86,6 +88,7 @@ namespace BikeApp.Controllers
                 return View(model);
             }
         }
+
 
 
         [HttpPost]

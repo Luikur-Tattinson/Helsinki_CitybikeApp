@@ -4,11 +4,21 @@
     ViewData["Title"] = "Home Page";
     string orderBy = ViewContext.HttpContext.Request.Query["orderBy"].FirstOrDefault();
     string sortOrder = ViewContext.HttpContext.Request.Query["sortOrder"].FirstOrDefault();
+    string search = ViewContext.HttpContext.Request.Query["search"].FirstOrDefault();
 }
 
 <h1>Stations</h1>
 
 <div id="map" style="height: 400px; width: 100%;"></div>
+
+<form action="/Home/Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" name="search" value="@search" placeholder="Search stations">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
 
 <table>
     <thead>
@@ -51,17 +61,19 @@
                     int startPage = Math.Max(1, currentPage - 2);
                     int endPage = Math.Min(totalPages, currentPage + 2);
 
+                    string searchParam = $"search={search}&";
+
                     if (startPage > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=1">First</a>
+                            <a class="page-link" href="/Home/Index?@(searchParam)page=1">First</a>
                         </li>
                     }
 
                     if (currentPage > 1)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@(currentPage - 1)">Previous</a>
+                            <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage - 1)">Previous</a>
                         </li>
                     }
 
@@ -76,7 +88,7 @@
                         else
                         {
                             <li class="page-item">
-                                <a class="page-link" href="/Home/Index?page=@i">@i</a>
+                                <a class="page-link" href="/Home/Index?@(searchParam)page=@i">@i</a>
                             </li>
                         }
                     }
@@ -84,20 +96,21 @@
                     if (currentPage < totalPages)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@(currentPage + 1)">Next</a>
+                            <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage + 1)">Next</a>
                         </li>
                     }
 
                     if (endPage < totalPages)
                     {
                         <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@totalPages">Last</a>
+                            <a class="page-link" href="/Home/Index?@(searchParam)page=@totalPages">Last</a>
                         </li>
                     }
                 }
             </ul>
         </nav>
     }
+
 </div>
 
 
