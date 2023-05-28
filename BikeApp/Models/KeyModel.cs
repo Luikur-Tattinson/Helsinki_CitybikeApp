@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace BikeApp.Models
 {
@@ -8,5 +9,17 @@ namespace BikeApp.Models
         public List<Station> Stations { get; set; }
         public List<Station> AllStations { get; set; }
         public PaginationViewModel Pagination { get; set; }
+        public string OrderBy { get; set; }
+        public string SortOrder { get; set; }
+
+        public string SortOrderFor(string column)
+        {
+            if (OrderBy == column)
+            {
+                return SortOrder == "asc" ? "desc" : "asc";
+            }
+            return "asc";
+        }
+
     }
 }

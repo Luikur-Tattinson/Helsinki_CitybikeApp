@@ -2,18 +2,31 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    string orderBy = ViewContext.HttpContext.Request.Query["orderBy"].FirstOrDefault();
+    string sortOrder = ViewContext.HttpContext.Request.Query["sortOrder"].FirstOrDefault();
 }
+
+<h1>Stations</h1>
 
 <div id="map" style="height: 400px; width: 100%;"></div>
 
-<table class="table">
+<table>
     <thead>
         <tr>
-            <th>Nimi</th>
-            <th>Kaupunki</th>
+            <th>
+                <a href="?orderBy=Nimi&amp;sortOrder=@Model.SortOrderFor("Nimi")">
+                    Nimi
+                </a>
+            </th>
+            <th>
+                <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">
+                    Kaupunki
+                </a>
+            </th>
             <!-- Add more columns as needed -->
         </tr>
     </thead>
+
     <tbody>
         @foreach (var station in Model.Stations)
         {
@@ -26,34 +39,26 @@
     </tbody>
 </table>
 
+
 <div>
-    @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
+    @if (Model.Pagination.TotalPages > 1)
     {
         <nav>
             <ul class="pagination">
-                @{
-                    int totalPages = Model.Pagination.TotalPages;
-                    int currentPage = Model.Pagination.CurrentPage;
-                    int startPage = Math.Max(1, currentPage - 2);
-                    int endPage = Math.Min(totalPages, currentPage + 2);
-
-                    if (startPage > 1)
+                @if (Model.Pagination.CurrentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Index?page=1">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Index?page=@(Model.Pagination.CurrentPage - 1)">Previous</a>
+                    </li>
+                }
+                @for (int i = Model.Pagination.CurrentPage - 2; i <= Model.Pagination.CurrentPage + 2 && i <= Model.Pagination.TotalPages; i++)
+                {
+                    if (i > 0)
                     {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=1">First</a>
-                        </li>
-                    }
-
-                    if (currentPage > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@(currentPage - 1)">Previous</a>
-                        </li>
-                    }
-
-                    for (int i = startPage; i <= endPage; i++)
-                    {
-                        if (i == currentPage)
+                        if (Model.Pagination.CurrentPage == i)
                         {
                             <li class="page-item active">
                                 <span class="page-link">@i</span>
@@ -66,20 +71,15 @@
                             </li>
                         }
                     }
-
-                    if (currentPage < totalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@(currentPage + 1)">Next</a>
-                        </li>
-                    }
-
-                    if (endPage < totalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?page=@totalPages">Last</a>
-                        </li>
-                    }
+                }
+                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Index?page=@(Model.Pagination.CurrentPage + 1)">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="/Home/Index?page=@Model.Pagination.TotalPages">Last</a>
+                    </li>
                 }
             </ul>
         </nav>
@@ -98,7 +98,7 @@
 
         var openInfoWindow = null;
 
-    @if (Model.AllStations != null && Model.AllStations.Count > 0)
+        @if (Model.AllStations != null && Model.AllStations.Count > 0)
     {
         @foreach (var station in Model.AllStations)
         {
@@ -146,4 +146,3 @@
 
     window.addEventListener('load', loadGoogleMaps);
 </script>
-
