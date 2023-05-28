@@ -1,0 +1,30 @@
+﻿<div id="addStationModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Add New Station</h2>
+        <form id="addStationForm" asp-controller="Home" asp-action="AddStation" method="POST">
+            <label for="nameInput">Nimi: *</label>
+            <input type="text" id="nameInput" name="Nimi" required>
+
+            <label for="namnInput">Namn:</label>
+            <input type="text" id="namnInput" name="Namn" />
+
+            <label for="addressInput">Osoite: *</label>
+            <input type="text" id="addressInput" name="Osoite" required>
+
+            <label for="cityInput">Kaupunki:</label>
+            <input type="text" id="cityInput" name="Kaupunki">
+
+            <label for="operatorInput">Operaattori:</label>
+            <input type="text" id="operatorInput" name="Operaattor">
+
+            <label for="capacityInput">Kapasiteetti:</label>
+            <input type="number" id="capacityInput" name="Kapasiteet">
+
+            <input type="text" id="lngInput" name="X">
+            <input type="text" id="latInput" name="Y">
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>

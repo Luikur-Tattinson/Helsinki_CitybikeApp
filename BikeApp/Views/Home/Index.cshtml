@@ -14,9 +14,10 @@
     <thead>
         <tr>
             <th>
-                <a href="?orderBy=Nimi&amp;sortOrder=@Model.SortOrderFor("Nimi")">
+                <a href="?orderBy=Nimi&amp;sortOrder=@(Model.SortOrderFor("Nimi"))">
                     Nimi
                 </a>
+
             </th>
             <th>
                 <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">
@@ -39,71 +40,29 @@
     </tbody>
 </table>
 
-
-<div>
-    @if (Model.Pagination.TotalPages > 1)
-    {
-        <nav>
-            <ul class="pagination">
-                @if (Model.Pagination.CurrentPage > 1)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="/Home/Index?page=1">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="/Home/Index?page=@(Model.Pagination.CurrentPage - 1)">Previous</a>
-                    </li>
-                }
-                @for (int i = Model.Pagination.CurrentPage - 2; i <= Model.Pagination.CurrentPage + 2 && i <= Model.Pagination.TotalPages; i++)
-                {
-                    if (i > 0)
-                    {
-                        if (Model.Pagination.CurrentPage == i)
-                        {
-                            <li class="page-item active">
-                                <span class="page-link">@i</span>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="/Home/Index?page=@i">@i</a>
-                            </li>
-                        }
-                    }
-                }
-                @if (Model.Pagination.CurrentPage < Model.Pagination.TotalPages)
-                {
-                    <li class="page-item">
-                        <a class="page-link" href="/Home/Index?page=@(Model.Pagination.CurrentPage + 1)">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="/Home/Index?page=@Model.Pagination.TotalPages">Last</a>
-                    </li>
-                }
-            </ul>
-        </nav>
-    }
-</div>
+@Html.Partial("addStationForm")
 
 <script>
+    var map;
+    var infoWindow;
+    var newLocationMarker;
+
     function initMap() {
         var options = {
             zoom: 12,
             center: { lat: 60.19193, lng: 24.91967 }
         };
 
-        var map = new google.maps.Map(document.getElementById('map'), options);
-        var infoWindow = new google.maps.InfoWindow();
+        map = new google.maps.Map(document.getElementById('map'), options);
+        infoWindow = new google.maps.InfoWindow();
 
-        var openInfoWindow = null;
-
-        @if (Model.AllStations != null && Model.AllStations.Count > 0)
+        // Add markers for existing stations
+    @if (Model.AllStations != null && Model.AllStations.Count > 0)
     {
         @foreach (var station in Model.AllStations)
         {
             <text>
-                                var lng = parseFloat('@station.X'.replace(',', '.'));
+                            var lng = parseFloat('@station.X'.replace(',', '.'));
                 var lat = parseFloat('@station.Y'.replace(',', '.'));
 
                 if (!isNaN(lat) && !isNaN(lng)) {
@@ -125,17 +84,32 @@
         }
     }
 
-            function addMarkerListener(marker, content) {
-                marker.addListener('click', function () {
-                    if (openInfoWindow) {
-                        openInfoWindow.close();
-                    }
+            // Add a right-click event listener to the map
+            map.addListener('rightclick', function (event) {
+                // Remove the previous newLocationMarker, if exists
+                if (newLocationMarker) {
+                    newLocationMarker.setMap(null);
+                }
 
-                    infoWindow.setContent(content);
-                    infoWindow.open(map, marker);
-                    openInfoWindow = infoWindow;
+                // Get the right-clicked location coordinates
+                var clickedLocation = event.latLng;
+
+                // Create the "New Location" marker
+                newLocationMarker = new google.maps.Marker({
+                    position: clickedLocation,
+                    map: map,
+                    title: 'New Location',
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                        scaledSize: new google.maps.Size(32, 32)
+                    }
                 });
-            }
+
+                // Open the modal when the "New Location" marker is clicked
+                newLocationMarker.addListener('click', function () {
+                    openAddStationModal(clickedLocation);
+                });
+            });
     }
 
     function loadGoogleMaps() {
@@ -145,4 +119,76 @@
     }
 
     window.addEventListener('load', loadGoogleMaps);
+
+    // Modal functionality
+    function openAddStationModal(clickedLocation) {
+        document.getElementById('lngInput').value = clickedLocation.lng();
+        document.getElementById('latInput').value = clickedLocation.lat();
+
+        var modal = document.getElementById('addStationModal');
+        modal.style.display = 'block';
+
+        var closeButton = document.getElementsByClassName('close')[0];
+        closeButton.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    // Form submission
+    var addStationForm = document.getElementById('addStationForm');
+    addStationForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var form = event.target;
+
+        // Replace dot with comma in the coordinates
+        var lngInput = document.getElementById('lngInput');
+        lngInput.value = lngInput.value.replace('.', ',');
+
+        var latInput = document.getElementById('latInput');
+        latInput.value = latInput.value.replace('.', ',');
+
+        var formData = new FormData(form);
+
+        // Perform an AJAX request to submit the form data
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Handle the success response
+                // You can display a success message or perform any additional actions
+                console.log('Station added successfully!');
+            } else {
+                // Handle the error response
+                // You can display an error message or perform any error handling
+                console.error('Error adding station.');
+            }
+            // Close the modal after form submission
+            var modal = document.getElementById('addStationModal');
+            modal.style.display = 'none';
+        };
+        xhr.onerror = function () {
+            // Handle the error case
+            console.error('Error adding station.');
+            // Close the modal after form submission
+            var modal = document.getElementById('addStationModal');
+            modal.style.display = 'none';
+        };
+        xhr.send(formData);
+    });
+
+    // Function to add a click event listener to a marker
+    function addMarkerListener(marker, content) {
+        marker.addListener('click', function () {
+            infoWindow.setContent(content);
+            infoWindow.open(map, marker);
+        });
+    }
+
+
 </script>

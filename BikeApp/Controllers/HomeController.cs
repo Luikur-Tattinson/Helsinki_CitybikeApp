@@ -87,9 +87,38 @@ namespace BikeApp.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AddStation(Station station)
+        {
+            if (ModelState.IsValid)
+            {
 
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    _logger.LogInformation("X: @X, Y: @Y");
+                    string insertQuery = @"INSERT INTO dbo.Stations (Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet, x, y)
+                                   VALUES (@Nimi, @Namn, @Osoite, @Kaupunki, @Operaattor, @Kapasiteet, @X, @Y)";
 
+                    await connection.ExecuteAsync(insertQuery, station);
 
+                    _logger.LogInformation("Station added to the database.");
+
+                    // Redirect to the Index action to display the updated list of stations
+                    return RedirectToAction("Index");
+                }
+            }
+            foreach (var modelStateEntry in ModelState.Values)
+            {
+                foreach (var error in modelStateEntry.Errors)
+                {
+                    _logger.LogError(error.ErrorMessage);
+                }
+            }
+            _logger.LogInformation($"X: {station.X}, Y: {station.Y}, NIMI: {station.Nimi}");
+            // If the model state is not valid, return the form view with validation errors
+            return PartialView("addStationForm", station);
+        }
 
         public IActionResult Journeys(int? month, string orderBy, string sortOrder, string searchTerm, int page = 1, int pageSize = 10)
         {
