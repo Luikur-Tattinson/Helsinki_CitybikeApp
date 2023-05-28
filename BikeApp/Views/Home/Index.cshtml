@@ -40,6 +40,67 @@
     </tbody>
 </table>
 
+<div>
+    @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
+    {
+        <nav>
+            <ul class="pagination">
+                @{
+                    int totalPages = Model.Pagination.TotalPages;
+                    int currentPage = Model.Pagination.CurrentPage;
+                    int startPage = Math.Max(1, currentPage - 2);
+                    int endPage = Math.Min(totalPages, currentPage + 2);
+
+                    if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=1">First</a>
+                        </li>
+                    }
+
+                    if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@(currentPage - 1)">Previous</a>
+                        </li>
+                    }
+
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <li class="page-item active">
+                                <span class="page-link">@i</span>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Index?page=@i">@i</a>
+                            </li>
+                        }
+                    }
+
+                    if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@(currentPage + 1)">Next</a>
+                        </li>
+                    }
+
+                    if (endPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="/Home/Index?page=@totalPages">Last</a>
+                        </li>
+                    }
+                }
+            </ul>
+        </nav>
+    }
+</div>
+
+
 @Html.Partial("addStationForm")
 
 <script>
