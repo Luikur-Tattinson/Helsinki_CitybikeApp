@@ -95,6 +95,24 @@ namespace BikeApp.Controllers
         [HttpPost]
         public async Task<IActionResult> AddStation(Station station)
         {
+            // Manually set missing fields to default values or null
+            if (string.IsNullOrEmpty(station.Namn))
+            {
+                station.Namn = null;
+            }
+            if (string.IsNullOrEmpty(station.Kaupunki))
+            {
+                station.Kaupunki = null;
+            }
+            if (string.IsNullOrEmpty(station.Operaattor))
+            {
+                station.Operaattor = null;
+            }
+            if (station.Kapasiteet == null)
+            {
+                station.Kapasiteet = null;
+            }
+
             if (ModelState.IsValid)
             {
                 using (SqlConnection connection = new SqlConnection(_connectionString))
