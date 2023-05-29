@@ -60,3 +60,92 @@ body {
     width: 70%;
     margin: 0 auto;
 }
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        text-align: center; /* Center align the labels */
+    }
+
+    .form-group input,
+    .form-group button {
+        width: 50%; /* Set inputs and buttons to half the width */
+        padding: 8px;
+        font-size: 16px;
+        box-sizing: border-box; /* Include padding in width calculation */
+        margin: 0 auto; /* Center align the inputs and button */
+        display: block; /* Make inputs and button take full width */
+    }
+
+button[type="submit"] {
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: royalblue; /* Remove the background color */
+    color: white; /* Set the text color for the buttons */
+}
+
+/* Add the following styles to your CSS file */
+
+/* Form styling */
+form {
+    margin-bottom: 20px;
+}
+
+    form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    form select,
+    form input[type="text"] {
+        width: 50%;
+        padding: 8px;
+        font-size: 16px;
+        display: block;
+    }
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    table th,
+    table td {
+        padding: 10px 20px;
+        border: 1px solid #000;
+    }
+
+/* Pagination styling */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.pagination {
+    list-style: none;
+    padding: 0;
+    display: flex;
+}
+
+    .pagination li {
+        margin-right: 5px;
+    }
+
+        .pagination li a {
+            display: block;
+            padding: 5px 10px;
+            text-decoration: none;
+            border: 1px solid;
+            border-radius: 5px;
+        }
+

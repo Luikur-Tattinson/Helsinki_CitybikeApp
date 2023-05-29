@@ -127,8 +127,6 @@
         }
     </div>
 
-
-
 @Html.Partial("addStationForm")
 
 <script>
@@ -231,47 +229,56 @@
         });
     }
 
-    // Form submission
-    var addStationForm = document.getElementById('addStationForm');
-    addStationForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        var form = event.target;
+        // Form submission
+        var addStationForm = document.getElementById('addStationForm');
+        addStationForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var form = event.target;
 
-        // Replace dot with comma in the coordinates
-        var lngInput = document.getElementById('lngInput');
-        lngInput.value = lngInput.value.replace('.', ',');
+            // Replace dot with comma in the coordinates
+            var lngInput = document.getElementById('lngInput');
+            lngInput.value = lngInput.value.replace('.', ',');
 
-        var latInput = document.getElementById('latInput');
-        latInput.value = latInput.value.replace('.', ',');
+            var latInput = document.getElementById('latInput');
+            latInput.value = latInput.value.replace('.', ',');
 
-        var formData = new FormData(form);
+            var formData = new FormData(form);
 
-        // Perform an AJAX request to submit the form data
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action);
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                // Handle the success response
-                // You can display a success message or perform any additional actions
-                console.log('Station added successfully!');
-            } else {
-                // Handle the error response
-                // You can display an error message or perform any error handling
+            // Perform an AJAX request to submit the form data
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action);
+            xhr.onload = function () {
+                if (xhr.status === 200 && xhr.responseText) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        // Handle the success response
+                        // Display the alert message
+                        alert('Station added successfully!');
+                        // Reload the page
+                        location.reload();
+                    } else {
+                        // Handle the error response
+                        // You can display an error message or perform any error handling
+                        console.error('Error adding station.');
+                    }
+                } else {
+                    // Handle the error case
+                    console.error('Error adding station.');
+                }
+                // Close the modal after form submission
+                var modal = document.getElementById('addStationModal');
+                modal.style.display = 'none';
+            };
+            xhr.onerror = function () {
+                // Handle the error case
                 console.error('Error adding station.');
-            }
-            // Close the modal after form submission
-            var modal = document.getElementById('addStationModal');
-            modal.style.display = 'none';
-        };
-        xhr.onerror = function () {
-            // Handle the error case
-            console.error('Error adding station.');
-            // Close the modal after form submission
-            var modal = document.getElementById('addStationModal');
-            modal.style.display = 'none';
-        };
-        xhr.send(formData);
-    });
+                // Close the modal after form submission
+                var modal = document.getElementById('addStationModal');
+                modal.style.display = 'none';
+            };
+            xhr.send(formData);
+        });
+
 
     // Function to add a click event listener to a marker
     function addMarkerListener(marker, content) {

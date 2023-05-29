@@ -97,7 +97,6 @@ namespace BikeApp.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
@@ -109,10 +108,14 @@ namespace BikeApp.Controllers
 
                     _logger.LogInformation("Station added to the database.");
 
-                    // Redirect to the Index action to display the updated list of stations
-                    return RedirectToAction("Index");
+                    // Set a TempData flag to indicate that the station was successfully added
+                    TempData["StationAdded"] = true;
+
+                    // Return a JSON response indicating success
+                    return Json(new { success = true });
                 }
             }
+
             foreach (var modelStateEntry in ModelState.Values)
             {
                 foreach (var error in modelStateEntry.Errors)
@@ -121,9 +124,11 @@ namespace BikeApp.Controllers
                 }
             }
             _logger.LogInformation($"X: {station.X}, Y: {station.Y}, NIMI: {station.Nimi}");
-            // If the model state is not valid, return the form view with validation errors
-            return PartialView("addStationForm", station);
+
+            // If the model state is not valid, return a JSON response indicating failure
+            return Json(new { success = false });
         }
+
 
         public IActionResult Journeys(int? month, string orderBy, string sortOrder, string searchTerm, int page = 1, int pageSize = 10)
         {
