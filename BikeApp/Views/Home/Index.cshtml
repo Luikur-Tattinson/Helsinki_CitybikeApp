@@ -45,15 +45,34 @@
     </thead>
 
     <tbody>
-        @foreach (var station in Model.Stations)
-        {
-            <tr>
-                <td class="table-box">@station.Nimi</td>
-                <td class="table-box">@station.Osoite</td>
-                <td class="table-box">@station.Kaupunki</td>
-                <td class="table-box">@station.Kapasiteet</td>
-            </tr>
-        }
+                @foreach (var station in Model.Stations)
+                {
+                    <tr>
+                        <td class="table-box">
+                            <a href="#" onclick="centerMapAndOpenInfoBox(
+                '@station.Nimi',
+                '@station.Namn',
+                '@station.Osoite',
+                '@station.Kaupunki',
+                '@station.Operaattor',
+                '@station.Kapasiteet',
+                '@station.X',
+                '@station.Y',
+                '@station.jrn_from',
+                '@station.jrn_to',
+                '@station.avg_dist_from',
+                '@station.avg_dist_to'
+            )">
+                                @station.Nimi
+                            </a>
+                        </td>
+                        <td class="table-box">@station.Osoite</td>
+                        <td class="table-box">@station.Kaupunki</td>
+                        <td class="table-box">@station.Kapasiteet</td>
+                    </tr>
+                }
+
+
     </tbody>
 </table>
 </div>
@@ -149,7 +168,7 @@
         @foreach (var station in Model.AllStations)
         {
             <text>
-                            var lng = parseFloat('@station.X'.replace(',', '.'));
+                var lng = parseFloat('@station.X'.replace(',', '.'));
                 var lat = parseFloat('@station.Y'.replace(',', '.'));
 
                 if (!isNaN(lat) && !isNaN(lng)) {
@@ -230,6 +249,39 @@
             }
         });
     }
+
+        function centerMapAndOpenInfoBox(nimi, namn, osoite, kaupunki, operaattori, kapasiteetti, x, y, jrn_from, jrn_to, avg_dist_from, avg_dist_to) {
+            // Parse the coordinates as floats
+            var latitude = parseFloat(y.replace(',', '.'));
+            var longitude = parseFloat(x.replace(',', '.'));
+
+            // Check if the parsed coordinates are valid numbers
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+                // Center the map to the selected station
+                map.setCenter({ lat: latitude, lng: longitude });
+
+                // Create the info box content
+                var content = '<div><h3>' + nimi + '</h3>' +
+                    '<p><strong>' + namn + '</strong></p>' +
+                    '<p>' + 'Osoite: ' + osoite + '</p>' +
+                    '<p>' + 'Kaupunki: ' + kaupunki + '</p>' +
+                    '<p>' + 'Operaattori: ' + operaattori + '</p>' +
+                    '<p>' + 'Kapasiteetti: ' + kapasiteetti + '</p>' +
+                    '<p>' + 'Journeys starting: ' + jrn_from + '</p>' +
+                    '<p>' + 'Journeys ending: ' + jrn_to + '</p>' +
+                    '<p>' + 'Average distance starting: ' + avg_dist_from + '</p>' +
+                    '<p>' + 'Average distance ending: ' + avg_dist_to + '</p></div>';
+
+                // Show the info box at the selected station
+                infoWindow.setContent(content);
+                infoWindow.setPosition({ lat: latitude, lng: longitude });
+                infoWindow.open(map);
+            } else {
+                console.error('Invalid coordinates.');
+            }
+        }
+
+
 
         // Form submission
         var addStationForm = document.getElementById('addStationForm');
