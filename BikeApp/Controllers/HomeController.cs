@@ -47,7 +47,7 @@ namespace BikeApp.Controllers
                 string query = "SELECT key_value FROM dbo.api_key";
                 var result = await connection.QueryFirstOrDefaultAsync<ApiKey>(query);
 
-                string queryStations = $"SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet, jrn_to, jrn_from FROM dbo.Stations WHERE Nimi LIKE '%{search}%' ORDER BY {orderBy} {sortOrder}";
+                string queryStations = $"SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet, jrn_to, jrn_from, avg_dist_from, avg_dist_to FROM dbo.Stations WHERE Nimi LIKE '%{search}%' ORDER BY {orderBy} {sortOrder}";
                 var stations = (await connection.QueryAsync<Station>(queryStations)).ToList();
 
                 _logger.LogInformation("Retrieved data from the database.");

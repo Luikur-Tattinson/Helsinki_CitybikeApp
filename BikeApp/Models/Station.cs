@@ -12,6 +12,8 @@
         public string Kapasiteet { get; set; }
         public int jrn_to { get; set; }
         public int jrn_from { get; set; }
+        public int avg_dist_from { get; set; }
+        public int avg_dist_to { get; set; }
 
     }
 }
