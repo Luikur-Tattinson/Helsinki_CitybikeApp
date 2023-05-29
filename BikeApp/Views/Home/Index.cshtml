@@ -6,12 +6,17 @@
     string sortOrder = ViewContext.HttpContext.Request.Query["sortOrder"].FirstOrDefault();
     string search = ViewContext.HttpContext.Request.Query["search"].FirstOrDefault();
 }
-
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BikeApp.styles.css" asp-append-version="true" />
+</head>
+<body>
 <h1>Stations</h1>
 
 <div id="map" style="height: 400px; width: 100%;"></div>
 
-<form action="/Home/Index" method="get" class="mb-3">
+<form action="/Home/Index" method="get" class="mb-3 mt-3" id="srchbar">
     <div class="input-group">
         <input type="text" class="form-control" name="search" value="@search" placeholder="Search stations">
         <div class="input-group-append">
@@ -20,19 +25,20 @@
     </div>
 </form>
 
+<div class="table-container">
 <table>
-    <thead>
+            <thead class="table-box">
         <tr>
             <th>
-                <a href="?orderBy=Nimi&amp;sortOrder=@(Model.SortOrderFor("Nimi"))">
-                    Nimi
-                </a>
-
+                <a href="?orderBy=Nimi&amp;sortOrder=@(Model.SortOrderFor("Nimi"))">Nimi</a></th>
+            <th>
+                <a href="?orderBy=Osoite&amp;sortOrder=@(Model.SortOrderFor("Osoite"))">Osoite</a>
             </th>
             <th>
-                <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">
-                    Kaupunki
-                </a>
+                <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">Kaupunki</a>
+            </th>
+            <th>
+                <a href="?orderBy=Kapasiteet&amp;sortOrder=@(Model.SortOrderFor("Kapasiteet"))">Kapasiteetti</a>
             </th>
             <!-- Add more columns as needed -->
         </tr>
@@ -42,76 +48,85 @@
         @foreach (var station in Model.Stations)
         {
             <tr>
-                <td>@station.Nimi</td>
-                <td>@station.Kaupunki</td>
-                <!-- Add more columns as needed -->
+                <td class="table-box">@station.Nimi</td>
+                <td class="table-box">@station.Osoite</td>
+                <td class="table-box">@station.Kaupunki</td>
+                <td class="table-box">@station.Kapasiteet</td>
             </tr>
         }
     </tbody>
 </table>
+</div>
 
-<div>
-    @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
-    {
-        <nav>
-            <ul class="pagination">
-                @{
-                    int totalPages = Model.Pagination.TotalPages;
-                    int currentPage = Model.Pagination.CurrentPage;
-                    int startPage = Math.Max(1, currentPage - 2);
-                    int endPage = Math.Min(totalPages, currentPage + 2);
+    <div class="pagination-container">
+        @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    @{
+                        int totalPages = Model.Pagination.TotalPages;
+                        int currentPage = Model.Pagination.CurrentPage;
+                        int visiblePages = 5;
+                        int halfVisible = visiblePages / 2;
+                        int startPage = Math.Max(1, currentPage - halfVisible);
+                        int endPage = Math.Min(totalPages, startPage + visiblePages - 1);
 
-                    string searchParam = $"search={search}&";
-
-                    if (startPage > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?@(searchParam)page=1">First</a>
-                        </li>
-                    }
-
-                    if (currentPage > 1)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage - 1)">Previous</a>
-                        </li>
-                    }
-
-                    for (int i = startPage; i <= endPage; i++)
-                    {
-                        if (i == currentPage)
+                        if (endPage - startPage + 1 < visiblePages)
                         {
-                            <li class="page-item active">
-                                <span class="page-link">@i</span>
-                            </li>
+                            startPage = Math.Max(1, endPage - visiblePages + 1);
                         }
-                        else
+
+                        string searchParam = $"search={search}&";
+
+                        if (startPage > 1)
                         {
                             <li class="page-item">
-                                <a class="page-link" href="/Home/Index?@(searchParam)page=@i">@i</a>
+                                <a class="page-link" href="/Home/Index?@(searchParam)page=1">First</a>
+                            </li>
+                        }
+
+                        if (currentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage - 1)">Previous</a>
+                            </li>
+                        }
+
+                        for (int i = startPage; i <= endPage; i++)
+                        {
+                            if (i == currentPage)
+                            {
+                                <li class="page-item active">
+                                    <span class="page-link">@i</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="/Home/Index?@(searchParam)page=@i">@i</a>
+                                </li>
+                            }
+                        }
+
+                        if (currentPage < totalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage + 1)">Next</a>
+                            </li>
+                        }
+
+                        if (endPage < totalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="/Home/Index?@(searchParam)page=@totalPages">Last</a>
                             </li>
                         }
                     }
+                </ul>
+            </nav>
+        }
+    </div>
 
-                    if (currentPage < totalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?@(searchParam)page=@(currentPage + 1)">Next</a>
-                        </li>
-                    }
-
-                    if (endPage < totalPages)
-                    {
-                        <li class="page-item">
-                            <a class="page-link" href="/Home/Index?@(searchParam)page=@totalPages">Last</a>
-                        </li>
-                    }
-                }
-            </ul>
-        </nav>
-    }
-
-</div>
 
 
 @Html.Partial("addStationForm")
@@ -150,7 +165,9 @@
                         '<p>' + 'Osoite: ' + '@station.Osoite' + '</p>' +
                         '<p>' + 'Kaupunki: ' + '@station.Kaupunki' + '</p>' +
                         '<p>' + 'Operaattori: ' + '@station.Operaattor' + '</p>' +
-                        '<p>' + 'Kapasiteetti: ' + '@station.Kapasiteet' + '</p></div>';
+                        '<p>' + 'Kapasiteetti: ' + '@station.Kapasiteet' + '</p>' +
+                        '<p>' + 'Journeys starting: ' + '@station.jrn_from' + '</p>' +
+                        '<p>' + 'Journeys ending: ' + '@station.jrn_to' + '</p></div>';
 
                     addMarkerListener(marker, content);
                 }
@@ -266,3 +283,5 @@
 
 
 </script>
+</body>
+</html>

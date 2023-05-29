@@ -10,6 +10,8 @@
         public string Kaupunki { get; set; }
         public string Operaattor { get; set; }
         public string Kapasiteet { get; set; }
+        public int jrn_to { get; set; }
+        public int jrn_from { get; set; }
 
     }
 }

@@ -1,20 +1,25 @@
 html {
-  font-size: 14px;
+    font-size: 16px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+}
+
+.navbar {
+    background-color: #DAA520;
+    font-size: 20px;
 }
 
 #map {
@@ -27,4 +32,31 @@ body {
     top: 0;
     left: 0;
     z-index: 9999;
+}
+
+.table-container {
+    justify-content: center;
+    display: flex;
+    margin-top: 20px;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.table-container th,
+.table-container td {
+    padding: 10px 20px;
+}
+
+.table-box {
+    border: 1px solid #000;
+    padding: 10px;
+}
+
+#srchbar {
+    width: 70%;
+    margin: 0 auto;
 }
