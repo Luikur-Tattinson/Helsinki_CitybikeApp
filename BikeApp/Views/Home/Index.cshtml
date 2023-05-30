@@ -12,39 +12,40 @@
     <link rel="stylesheet" href="~/BikeApp.styles.css" asp-append-version="true" />
 </head>
 <body>
-<h1>Stations</h1>
+    <h1>Stations</h1>
 
-<div id="map" style="height: 400px; width: 100%;"></div>
+    <div id="map" style="height: 400px; width: 100%;"></div>
 
-<form action="/Home/Index" method="get" class="mb-3 mt-3" id="srchbar">
-    <div class="input-group">
-        <input type="text" class="form-control" name="search" value="@search" placeholder="Search stations">
-        <div class="input-group-append">
-            <button type="submit" class="btn btn-primary">Search</button>
+    <form action="/Home/Index" method="get" class="mb-3 mt-3" id="srchbar">
+        <div class="input-group">
+            <input type="text" class="form-control" name="search" value="@search" placeholder="Search stations">
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
 
-<div class="table-container">
-<table>
+    <div class="table-container">
+        <table>
             <thead class="table-box">
-        <tr>
-            <th>
-                <a href="?orderBy=Nimi&amp;sortOrder=@(Model.SortOrderFor("Nimi"))">Nimi</a></th>
-            <th>
-                <a href="?orderBy=Osoite&amp;sortOrder=@(Model.SortOrderFor("Osoite"))">Osoite</a>
-            </th>
-            <th>
-                <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">Kaupunki</a>
-            </th>
-            <th>
-                <a href="?orderBy=Kapasiteet&amp;sortOrder=@(Model.SortOrderFor("Kapasiteet"))">Kapasiteetti</a>
-            </th>
-            <!-- Add more columns as needed -->
-        </tr>
-    </thead>
+                <tr>
+                    <th>
+                        <a href="?orderBy=Nimi&amp;sortOrder=@(Model.SortOrderFor("Nimi"))">Nimi</a>
+                    </th>
+                    <th>
+                        <a href="?orderBy=Osoite&amp;sortOrder=@(Model.SortOrderFor("Osoite"))">Osoite</a>
+                    </th>
+                    <th>
+                        <a href="?orderBy=Kaupunki&amp;sortOrder=@Model.SortOrderFor("Kaupunki")">Kaupunki</a>
+                    </th>
+                    <th>
+                        <a href="?orderBy=Kapasiteet&amp;sortOrder=@(Model.SortOrderFor("Kapasiteet"))">Kapasiteetti</a>
+                    </th>
+                    <!-- Add more columns as needed -->
+                </tr>
+            </thead>
 
-    <tbody>
+            <tbody>
                 @foreach (var station in Model.Stations)
                 {
                     <tr>
@@ -73,9 +74,9 @@
                 }
 
 
-    </tbody>
-</table>
-</div>
+            </tbody>
+        </table>
+    </div>
 
     <div class="pagination-container">
         @if (Model.Pagination != null && Model.Pagination.TotalPages > 1)
@@ -146,109 +147,109 @@
         }
     </div>
 
-@Html.Partial("addStationForm")
+    @Html.Partial("addStationForm")
 
-<script>
-    var map;
-    var infoWindow;
-    var newLocationMarker;
+    <script>
+        var map;
+        var infoWindow;
+        var newLocationMarker;
 
-    function initMap() {
-        var options = {
-            zoom: 12,
-            center: { lat: 60.19193, lng: 24.91967 }
-        };
+        function initMap() {
+            var options = {
+                zoom: 12,
+                center: { lat: 60.19193, lng: 24.91967 }
+            };
 
-        map = new google.maps.Map(document.getElementById('map'), options);
-        infoWindow = new google.maps.InfoWindow();
+            map = new google.maps.Map(document.getElementById('map'), options);
+            infoWindow = new google.maps.InfoWindow();
 
-        // Add markers for existing stations
-    @if (Model.AllStations != null && Model.AllStations.Count > 0)
-    {
-        @foreach (var station in Model.AllStations)
+            // Add markers for existing stations
+        @if (Model.AllStations != null && Model.AllStations.Count > 0)
         {
-            <text>
-                var lng = parseFloat('@station.X'.replace(',', '.'));
-                var lat = parseFloat('@station.Y'.replace(',', '.'));
+            @foreach (var station in Model.AllStations)
+            {
+                <text>
+                                                    var lng = parseFloat('@station.X'.replace(',', '.'));
+                    var lat = parseFloat('@station.Y'.replace(',', '.'));
 
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    var marker = new google.maps.Marker({
-                        position: { lat: lat, lng: lng },
-                        map: map
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        var marker = new google.maps.Marker({
+                            position: { lat: lat, lng: lng },
+                            map: map
+                        });
+
+                        var content = '<div><h3>' + '@station.Nimi' + '</h3>' +
+                            '<p><strong>' + '@station.Namn' + '</strong></p>' +
+                            '<p>' + 'Osoite: ' + '@station.Osoite' + '</p>' +
+                            '<p>' + 'Kaupunki: ' + '@station.Kaupunki' + '</p>' +
+                            '<p>' + 'Operaattori: ' + '@station.Operaattor' + '</p>' +
+                            '<p>' + 'Kapasiteetti: ' + '@station.Kapasiteet' + '</p>' +
+                            '<p>' + 'Journeys starting: ' + '@station.jrn_from' + '</p>' +
+                            '<p>' + 'Journeys ending: ' + '@station.jrn_to' + '</p>' +
+                            '<p>' + 'Average distance starting: ' + '@station.avg_dist_from' + '</p>' +
+                            '<p>' + 'Average distance ending: ' + '@station.avg_dist_to' + '</p></div>';
+
+                        addMarkerListener(marker, content);
+                    }
+                </text>
+            }
+        }
+
+                // Add a right-click event listener to the map
+                map.addListener('rightclick', function (event) {
+                    // Remove the previous newLocationMarker, if exists
+                    if (newLocationMarker) {
+                        newLocationMarker.setMap(null);
+                    }
+
+                    // Get the right-clicked location coordinates
+                    var clickedLocation = event.latLng;
+
+                    // Create the "New Location" marker
+                    newLocationMarker = new google.maps.Marker({
+                        position: clickedLocation,
+                        map: map,
+                        title: 'New Location',
+                        icon: {
+                            url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                            scaledSize: new google.maps.Size(32, 32)
+                        }
                     });
 
-                    var content = '<div><h3>' + '@station.Nimi' + '</h3>' +
-                        '<p><strong>' + '@station.Namn' + '</strong></p>' +
-                        '<p>' + 'Osoite: ' + '@station.Osoite' + '</p>' +
-                        '<p>' + 'Kaupunki: ' + '@station.Kaupunki' + '</p>' +
-                        '<p>' + 'Operaattori: ' + '@station.Operaattor' + '</p>' +
-                        '<p>' + 'Kapasiteetti: ' + '@station.Kapasiteet' + '</p>' +
-                        '<p>' + 'Journeys starting: ' + '@station.jrn_from' + '</p>' +
-                        '<p>' + 'Journeys ending: ' + '@station.jrn_to' + '</p>' +
-                        '<p>' + 'Average distance starting: ' + '@station.avg_dist_from' + '</p>' +
-                        '<p>' + 'Average distance ending: ' + '@station.avg_dist_to' + '</p></div>';
-
-                    addMarkerListener(marker, content);
-                }
-            </text>
+                    // Open the modal when the "New Location" marker is clicked
+                    newLocationMarker.addListener('click', function () {
+                        openAddStationModal(clickedLocation);
+                    });
+                });
         }
-    }
 
-            // Add a right-click event listener to the map
-            map.addListener('rightclick', function (event) {
-                // Remove the previous newLocationMarker, if exists
-                if (newLocationMarker) {
-                    newLocationMarker.setMap(null);
-                }
+        function loadGoogleMaps() {
+            var script = document.createElement('script');
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=@Model?.Key&callback=initMap';
+            document.head.appendChild(script);
+        }
 
-                // Get the right-clicked location coordinates
-                var clickedLocation = event.latLng;
+        window.addEventListener('load', loadGoogleMaps);
 
-                // Create the "New Location" marker
-                newLocationMarker = new google.maps.Marker({
-                    position: clickedLocation,
-                    map: map,
-                    title: 'New Location',
-                    icon: {
-                        url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                        scaledSize: new google.maps.Size(32, 32)
-                    }
-                });
+        // Modal functionality
+        function openAddStationModal(clickedLocation) {
+            document.getElementById('lngInput').value = clickedLocation.lng();
+            document.getElementById('latInput').value = clickedLocation.lat();
 
-                // Open the modal when the "New Location" marker is clicked
-                newLocationMarker.addListener('click', function () {
-                    openAddStationModal(clickedLocation);
-                });
-            });
-    }
+            var modal = document.getElementById('addStationModal');
+            modal.style.display = 'block';
 
-    function loadGoogleMaps() {
-        var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=@Model?.Key&callback=initMap';
-        document.head.appendChild(script);
-    }
-
-    window.addEventListener('load', loadGoogleMaps);
-
-    // Modal functionality
-    function openAddStationModal(clickedLocation) {
-        document.getElementById('lngInput').value = clickedLocation.lng();
-        document.getElementById('latInput').value = clickedLocation.lat();
-
-        var modal = document.getElementById('addStationModal');
-        modal.style.display = 'block';
-
-        var closeButton = document.getElementsByClassName('close')[0];
-        closeButton.addEventListener('click', function () {
-            modal.style.display = 'none';
-        });
-
-        window.addEventListener('click', function (event) {
-            if (event.target === modal) {
+            var closeButton = document.getElementsByClassName('close')[0];
+            closeButton.addEventListener('click', function () {
                 modal.style.display = 'none';
-            }
-        });
-    }
+            });
+
+            window.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
 
         function centerMapAndOpenInfoBox(nimi, namn, osoite, kaupunki, operaattori, kapasiteetti, x, y, jrn_from, jrn_to, avg_dist_from, avg_dist_to) {
             // Parse the coordinates as floats
@@ -280,8 +281,6 @@
                 console.error('Invalid coordinates.');
             }
         }
-
-
 
         // Form submission
         var addStationForm = document.getElementById('addStationForm');
@@ -333,16 +332,13 @@
             xhr.send(formData);
         });
 
-
-    // Function to add a click event listener to a marker
-    function addMarkerListener(marker, content) {
-        marker.addListener('click', function () {
-            infoWindow.setContent(content);
-            infoWindow.open(map, marker);
-        });
-    }
-
-
-</script>
+        // Function to add a click event listener to a marker
+        function addMarkerListener(marker, content) {
+            marker.addListener('click', function () {
+                infoWindow.setContent(content);
+                infoWindow.open(map, marker);
+            });
+        }
+    </script>
 </body>
 </html>

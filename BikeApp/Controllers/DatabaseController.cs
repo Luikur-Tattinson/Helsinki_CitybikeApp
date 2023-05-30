@@ -9,6 +9,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
+
+//Old controller, here to avoid routing issues. Can ignore.
+
+
 [ApiController]
 [Route("[controller]")]
 public class DatabaseController : Controller
@@ -37,22 +41,15 @@ public class DatabaseController : Controller
     [HttpGet("GetApiKey")]
     public async Task<IActionResult> GetApiKey()
     {
-        _logger.LogInformation("Connecting to the database...");
 
         using (SqlConnection connection = new SqlConnection(_connectionString))
         {
             await connection.OpenAsync();
 
-            _logger.LogInformation("Connected to the database.");
-
             string query = "SELECT key_value FROM dbo.api_key";
             var result = await connection.QueryFirstOrDefaultAsync<ApiKey>(query);
 
-            _logger.LogInformation("Retrieved data from the database.");
-            _logger.LogInformation($"Key: {result?.key_value}");
-
             var model = new KeyModel { Key = result?.key_value };
-            _logger.LogInformation($"Model Key: {model?.Key}");
             return View("~/Views/Home/Index.cshtml", model);
         }
     }

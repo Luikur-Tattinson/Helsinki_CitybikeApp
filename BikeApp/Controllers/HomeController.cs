@@ -11,8 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static DatabaseController;
 using Microsoft.AspNetCore.Http;
+using static DatabaseController;
 
 namespace BikeApp.Controllers
 {
@@ -36,13 +36,9 @@ namespace BikeApp.Controllers
 
         public async Task<IActionResult> Index(int page = 1, int pageSize = 10, string orderBy = "Nimi", string sortOrder = "asc", string search = "")
         {
-            _logger.LogInformation("Connecting to the database...");
-
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-
-                _logger.LogInformation("Connected to the database.");
 
                 string query = "SELECT key_value FROM dbo.api_key";
                 var result = await connection.QueryFirstOrDefaultAsync<ApiKey>(query);
@@ -50,12 +46,9 @@ namespace BikeApp.Controllers
                 string queryStations = $"SELECT x, y, Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet, jrn_to, jrn_from, avg_dist_from, avg_dist_to FROM dbo.Stations WHERE Nimi LIKE '%{search}%' ORDER BY {orderBy} {sortOrder}";
                 var stations = (await connection.QueryAsync<Station>(queryStations)).ToList();
 
-                _logger.LogInformation("Retrieved data from the database.");
-                _logger.LogInformation($"Key: {result?.key_value}");
-
                 var totalRecords = stations.Count;
                 var totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
-                
+
 
                 // Apply pagination
                 var startIndex = (page - 1) * pageSize;
@@ -79,18 +72,14 @@ namespace BikeApp.Controllers
                 ViewData["SortOrder"] = sortOrder;
                 ViewData["Search"] = search;
 
-                _logger.LogInformation($"Model Key: {model?.Key}");
                 if (model.Stations != null && model.Stations.Count > 0)
                 {
                     var firstStation = model.Stations[0];
-                    _logger.LogInformation($"First station: X= {firstStation.X}, Y = {firstStation.Y}");
                 }
 
                 return View(model);
             }
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> AddStation(Station station)
@@ -118,13 +107,11 @@ namespace BikeApp.Controllers
                 using (SqlConnection connection = new SqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
-                    _logger.LogInformation("X: @X, Y: @Y");
+
                     string insertQuery = @"INSERT INTO dbo.Stations (Nimi, Namn, Osoite, Kaupunki, Operaattor, Kapasiteet, x, y)
                                    VALUES (@Nimi, @Namn, @Osoite, @Kaupunki, @Operaattor, @Kapasiteet, @X, @Y)";
 
                     await connection.ExecuteAsync(insertQuery, station);
-
-                    _logger.LogInformation("Station added to the database.");
 
                     // Set a TempData flag to indicate that the station was successfully added
                     TempData["StationAdded"] = true;
@@ -134,19 +121,9 @@ namespace BikeApp.Controllers
                 }
             }
 
-            foreach (var modelStateEntry in ModelState.Values)
-            {
-                foreach (var error in modelStateEntry.Errors)
-                {
-                    _logger.LogError(error.ErrorMessage);
-                }
-            }
-            _logger.LogInformation($"X: {station.X}, Y: {station.Y}, NIMI: {station.Nimi}");
-
             // If the model state is not valid, return a JSON response indicating failure
             return Json(new { success = false });
         }
-
 
         public IActionResult Journeys(int? month, string orderBy, string sortOrder, string searchTerm, int page = 1, int pageSize = 10)
         {
@@ -251,8 +228,5 @@ namespace BikeApp.Controllers
 
             return orderByClause;
         }
-
-
-
     }
 }
