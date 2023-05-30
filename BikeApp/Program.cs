@@ -7,10 +7,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
-
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,19 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.UseSession(); // Add session middleware
+
+// Set the culture
+var supportedCultures = new[]
+{
+    new CultureInfo("fi-FI") 
+};
+
+app.UseRequestLocalization(new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("fi-FI"), 
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures,
+});
 
 // Call a method to configure Dapper mappings
 ConfigureDapperMappings();
